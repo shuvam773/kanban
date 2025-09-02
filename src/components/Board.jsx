@@ -40,6 +40,8 @@ import {
   addSectionLocal,
   updateSectionLocal,
   deleteSectionLocal,
+  moveTaskLocal,
+  deleteTaskLocal,
 } from '../store/kanbanSlice';
 
 const Board = () => {
@@ -97,8 +99,7 @@ const Board = () => {
     });
 
     socket.on('task-moved', (data) => {
-      // Handle task movement in your store
-      // You'll need to implement this in your kanbanSlice
+      dispatch(moveTaskLocal(data));
     });
 
     socket.on('task-deleted', (data) => {

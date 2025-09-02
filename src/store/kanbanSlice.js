@@ -135,6 +135,33 @@ const kanbanSlice = createSlice({
         section.tasks = section.tasks.filter((task) => task._id !== taskId);
       }
     },
+    moveTaskLocal: (state, action) => {
+      const { taskId, sourceSectionId, destinationSectionId, task } =
+        action.payload;
+
+      const sourceSection = state.sections.find(
+        (s) => s._id === sourceSectionId
+      );
+      const destSection = state.sections.find(
+        (s) => s._id === destinationSectionId
+      );
+
+      if (sourceSection && destSection) {
+        // Remove task from source section if it exists
+        const taskIndex = sourceSection.tasks.findIndex(
+          (t) => t._id === taskId
+        );
+        if (taskIndex > -1) {
+          sourceSection.tasks.splice(taskIndex, 1);
+        }
+
+        // Add task to destination section
+        if (!destSection.tasks) {
+          destSection.tasks = [];
+        }
+        destSection.tasks.push(task);
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -238,6 +265,7 @@ export const {
   addTaskLocal,
   updateTaskLocal,
   deleteTaskLocal,
+  moveTaskLocal,
 } = kanbanSlice.actions;
 
 export default kanbanSlice.reducer;

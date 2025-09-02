@@ -8,32 +8,49 @@ import {
   DialogActions,
   TextField,
   Button,
+  Box,
+  Typography,
+  alpha,
+  useTheme,
+  InputAdornment,
+  MenuItem
 } from "@mui/material";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import {
+  Description as DescriptionIcon,
+  Event as EventIcon,
+  Person as PersonIcon,
+  Title as TitleIcon,
+  LowPriority as PriorityIcon
+} from "@mui/icons-material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
+
 
 const UpdateTaskForm = ({ open, onClose, task, sectionId }) => {
   const dispatch = useDispatch();
+  const theme = useTheme();
+  
   const [taskData, setTaskData] = useState({
     name: "",
     description: "",
-    dueDate: dayjs(),
-    assignee: ""
+    dueDate: null,
+    assignee: "",
+    priority: ""
   });
-
 
   useEffect(() => {
     if (task) {
       setTaskData({
         name: task.name || "",
         description: task.description || "",
-        dueDate: dayjs(task.dueDate),
+        dueDate: task.dueDate ? dayjs(task.dueDate) : null,
         assignee: task.assignee || "",
+        priority: task.priority || ""
       });
     }
-  }, [task]);
+  }, [task, open]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -53,7 +70,7 @@ const UpdateTaskForm = ({ open, onClose, task, sectionId }) => {
   const handleSubmit = () => {
     const updatedData = {
       ...taskData,
-      dueDate: taskData.dueDate.toISOString(),
+      dueDate: taskData.dueDate ? taskData.dueDate.toISOString() : "",
       section: sectionId,
     };
     
@@ -63,62 +80,187 @@ const UpdateTaskForm = ({ open, onClose, task, sectionId }) => {
       taskData: updatedData,
     }));
     
-    
     onClose();
   };
 
+  const priorities = [
+    { value: "high", label: "High", color: "#DC2626" },
+    { value: "medium", label: "Medium", color: "#F59E0B" },
+    { value: "low", label: "Low", color: "#10B981" }
+  ];
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Update Task</DialogTitle>
-      <DialogContent>
+    <Dialog 
+      open={open} 
+      onClose={onClose} 
+      maxWidth="sm" 
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: 3,
+          overflow: 'hidden'
+        }
+      }}
+    >
+      <DialogTitle 
+        sx={{ 
+          background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.2)} 0%, ${alpha(theme.palette.primary.main, 0.05)} 100%)`,
+          borderBottom: `1px solid ${alpha(theme.palette.primary.main, 0.2)}`,
+          py: 2,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1
+        }}
+      >
+        <Box
+          sx={{
+            width: 8,
+            height: 8,
+            borderRadius: '50%',
+            backgroundColor: theme.palette.primary.main
+          }}
+        />
+        <Typography variant="h6" fontWeight={600}>
+          Update Task
+        </Typography>
+      </DialogTitle>
+      
+      <DialogContent sx={{ py: 3 }}>
         <TextField
           autoFocus
-          margin="dense"
           name="name"
           label="Task Name"
-          type="text"
           fullWidth
+          margin="normal"
           value={taskData.name}
           onChange={handleChange}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <TitleIcon sx={{ color: theme.palette.text.secondary }} />
+              </InputAdornment>
+            ),
+          }}
           sx={{ mb: 2 }}
         />
+        
         <TextField
-          margin="dense"
           name="description"
           label="Description"
-          type="text"
           fullWidth
+          multiline
           rows={3}
+          margin="normal"
           value={taskData.description}
           onChange={handleChange}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <DescriptionIcon sx={{ color: theme.palette.text.secondary, mt: 'auto', mb: 'auto' }} />
+              </InputAdornment>
+            ),
+          }}
           sx={{ mb: 2 }}
         />
-        <TextField
-          margin="dense"
-          name="assignee"
-          label="Assignee"
-          type="text"
-          fullWidth
-          value={taskData.assignee}
-          onChange={handleChange}
-          sx={{ mb: 2 }}
-        />
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DatePicker
-            label="Due Date"
-            value={taskData.dueDate}
-            onChange={handleDateChange}
-            slotProps={{ textField: { fullWidth: true, margin: "dense" } }}
-            sx={{ mb: 2 }}
+        
+        <Box display="flex" gap={2} sx={{ mb: 2 }}>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              label="Due Date"
+              value={taskData.dueDate}
+              onChange={handleDateChange}
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  InputProps: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <EventIcon sx={{ color: theme.palette.text.secondary }} />
+                      </InputAdornment>
+                    ),
+                  }
+                }
+              }}
+            />
+          </LocalizationProvider>
+          
+          <TextField
+            name="assignee"
+            label="Assignee"
+            fullWidth
+            margin="normal"
+            value={taskData.assignee}
+            onChange={handleChange}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <PersonIcon sx={{ color: theme.palette.text.secondary }} />
+                </InputAdornment>
+              ),
+            }}
           />
-        </LocalizationProvider>
+        </Box>
+        
+        <TextField
+          name="priority"
+          label="Priority"
+          select
+          fullWidth
+          margin="normal"
+          value={taskData.priority}
+          onChange={handleChange}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <PriorityIcon sx={{ color: theme.palette.text.secondary }} />
+              </InputAdornment>
+            ),
+          }}
+        >
+          <MenuItem value="">None</MenuItem>
+          {priorities.map((option) => (
+            <MenuItem key={option.value} value={option.value}>
+              <Box display="flex" alignItems="center" gap={1}>
+                <Box
+                  sx={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    backgroundColor: option.color
+                  }}
+                />
+                {option.label}
+              </Box>
+            </MenuItem>
+          ))}
+        </TextField>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} color="secondary">
+      
+      <DialogActions sx={{ px: 3, pb: 2 }}>
+        <Button 
+          onClick={onClose} 
+          sx={{ 
+            borderRadius: 2,
+            px: 2,
+            py: 1
+          }}
+        >
           Cancel
         </Button>
-        <Button onClick={handleSubmit} color="primary" variant="contained">
+        <Button 
+          variant="contained" 
+          onClick={handleSubmit}
+          disabled={!taskData.name.trim()}
+          sx={{ 
+            borderRadius: 2,
+            px: 2,
+            py: 1,
+            background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${alpha(theme.palette.primary.main, 0.8)} 100%)`,
+            '&:hover': {
+              background: `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.9)} 0%, ${alpha(theme.palette.primary.main, 0.7)} 100%)`,
+            }
+          }}
+        >
           Update Task
         </Button>
       </DialogActions>

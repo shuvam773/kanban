@@ -29,7 +29,7 @@ import {
 } from "@mui/icons-material";
 import { styled } from "@mui/material/styles";
 
-// Styled components for enhanced UI
+
 const StyledDialog = styled(Dialog)(({ theme }) => ({
   "& .MuiDialog-paper": {
     borderRadius: 16,
@@ -151,14 +151,14 @@ const AuthForm = ({ open, handleClose }) => {
     setShowPassword(!showPassword);
   };
 
-  // Handle successful signup
+ 
   useEffect(() => {
     if (signupSuccess) {
-      // After successful signup, switch to login mode with email pre-filled
+      
       setIsLogin(true);
       setFormData(prev => ({
         name: "",
-        email: prev.email, // Keep the email
+        email: prev.email, 
         password: "",
         userPhoto: ""
       }));

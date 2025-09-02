@@ -9,7 +9,7 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     if (token) {
-      const newSocket = io("http://localhost:5000", {
+      const newSocket = io(import.meta.env.VITE_REACT_APP_API_URL, {
         auth: {
           token: token
         }
@@ -19,7 +19,7 @@ export const SocketProvider = ({ children }) => {
 
       return () => newSocket.close();
     } else {
-      // If no token, close existing socket
+      
       if (socket) {
         socket.close();
         setSocket(null);

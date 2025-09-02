@@ -26,6 +26,9 @@ import {
   MenuItem,
   Drawer,
   Chip,
+  Fab,
+  SwipeableDrawer,
+  alpha,
 } from '@mui/material';
 import Section from './Section';
 import AddIcon from '@mui/icons-material/Add';
@@ -35,6 +38,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import ViewKanbanIcon from '@mui/icons-material/ViewKanban';
 import PeopleIcon from '@mui/icons-material/People';
+import CloseIcon from '@mui/icons-material/Close';
 import AuthForm from './AuthForm';
 import LoadingScreen from './LoadingScreen';
 import { useSocket } from '../hooks/useSocket';
@@ -68,6 +72,7 @@ const Board = () => {
   const [isAuthFormOpen, setIsAuthFormOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuAnchorEl, setUserMenuAnchorEl] = useState(null);
+  const [showSearch, setShowSearch] = useState(false);
   const socket = useSocket();
 
   useEffect(() => {
@@ -141,6 +146,9 @@ const Board = () => {
 
   const clearSearch = () => {
     setSearchQuery('');
+    if (isMobile) {
+      setShowSearch(false);
+    }
   };
 
   const handleAddSection = () => {
@@ -196,16 +204,18 @@ const Board = () => {
             '&:hover': {
               background: 'linear-gradient(45deg, #5a6fd8 0%, #6a4190 100%)',
             },
+            minWidth: isMobile ? 'auto' : 'inherit',
+            px: isMobile ? 1 : 2,
           }}
         >
-          Sign Up / Login
+          {isMobile ? 'Login' : 'Sign Up / Login'}
         </Button>
       );
     }
 
     return (
       <Box display="flex" alignItems="center" gap={1}>
-        <IconButton onClick={handleUserMenuOpen}>
+        <IconButton onClick={handleUserMenuOpen} size="small">
           <Avatar
             src={userPhoto}
             alt={user?.name}
@@ -250,6 +260,73 @@ const Board = () => {
     );
   };
 
+  const renderSearchBar = () => {
+    if (isMobile && !showSearch) {
+      return (
+        <IconButton 
+          onClick={() => setShowSearch(true)}
+          sx={{ color: '#667eea' }}
+        >
+          <SearchIcon />
+        </IconButton>
+      );
+    }
+
+    return (
+      <Box 
+        sx={{ 
+          display: 'flex', 
+          alignItems: 'center',
+          width: isMobile ? '100%' : (isTablet ? 200 : 300),
+          ...(isMobile && {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '100%',
+            bgcolor: 'white',
+            px: 1,
+          })
+        }}
+      >
+        <TextField
+          variant="outlined"
+          placeholder="Search tasks..."
+          size="small"
+          value={searchQuery}
+          onChange={handleSearch}
+          sx={{
+            width: '100%',
+            bgcolor: 'white',
+            borderRadius: 2,
+            '& .MuiOutlinedInput-root': {
+              borderRadius: 2,
+            },
+          }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon color="action" />
+              </InputAdornment>
+            ),
+            endAdornment: (searchQuery || isMobile) && (
+              <InputAdornment position="end">
+                <IconButton
+                  size="small"
+                  onClick={clearSearch}
+                  edge="end"
+                >
+                  {isMobile ? <CloseIcon fontSize="small" /> : <ClearIcon fontSize="small" />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+          autoFocus={isMobile && showSearch}
+        />
+      </Box>
+    );
+  };
+
   if (loading) return <LoadingScreen />;
 
   return (
@@ -263,6 +340,7 @@ const Board = () => {
           color: 'text.primary',
           background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
           borderBottom: '1px solid #e9ecef',
+          position: 'relative',
         }}
       >
         <Toolbar
@@ -271,16 +349,22 @@ const Board = () => {
             justifyContent: 'space-between',
             alignItems: 'center',
             py: 1,
+            minHeight: { xs: '56px', sm: '64px' },
           }}
         >
           {/* Left: Logo & Title */}
-          <Box display="flex" alignItems="center" gap={1}>
+          <Box display="flex" alignItems="center" gap={1} sx={{ 
+            flex: isMobile && showSearch ? 0 : 1,
+            minWidth: isMobile && showSearch ? 0 : 'auto',
+            overflow: isMobile && showSearch ? 'hidden' : 'visible',
+          }}>
             {isMobile && (
               <IconButton
                 color="inherit"
                 onClick={() => setMobileMenuOpen(true)}
                 edge="start"
-                sx={{ color: '#667eea' }}
+                sx={{ color: '#667eea', mr: 1 }}
+                size="small"
               >
                 <MenuIcon />
               </IconButton>
@@ -289,13 +373,15 @@ const Board = () => {
               sx={{ 
                 color: '#667eea', 
                 fontSize: isMobile ? '28px' : '32px',
-                mr: 1 
+                mr: 1,
+                display: isMobile && showSearch ? 'none' : 'block',
               }} 
             />
-            <Box>
+            <Box sx={{ display: isMobile && showSearch ? 'none' : 'block' }}>
               <Typography 
                 variant={isMobile ? 'h6' : 'h5'} 
                 fontWeight="700"
+                noWrap
                 sx={{ 
                   background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
                   backgroundClip: 'text',
@@ -332,56 +418,34 @@ const Board = () => {
             alignItems="center"
             gap={2}
             sx={{
-              order: isMobile ? 2 : 0,
-              width: isMobile ? '100%' : 'auto',
-              mt: isMobile ? 1 : 0,
+              flex: isMobile && showSearch ? 1 : 0,
+              justifyContent: 'flex-end',
+              ...(isMobile && showSearch ? {
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                px: 1,
+              } : {})
             }}
           >
-            {!isMobile && (
-              <TextField
-                variant="outlined"
-                placeholder="Search tasks..."
-                size="small"
-                value={searchQuery}
-                onChange={handleSearch}
-                sx={{
-                  width: isTablet ? 200 : 300,
-                  bgcolor: 'white',
-                  borderRadius: 2,
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                  },
-                }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon color="action" />
-                    </InputAdornment>
-                  ),
-                  endAdornment: searchQuery && (
-                    <InputAdornment position="end">
-                      <IconButton
-                        size="small"
-                        onClick={clearSearch}
-                        edge="end"
-                      >
-                        <ClearIcon fontSize="small" />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
+            {!isMobile && renderSearchBar()}
+            {isMobile && !showSearch && renderAuthButton()}
+            {isMobile && showSearch && (
+              <Box sx={{ flex: 1 }}>
+                {renderSearchBar()}
+              </Box>
             )}
-            {renderAuthButton()}
+            {!isMobile && renderAuthButton()}
           </Box>
         </Toolbar>
       </AppBar>
 
       {/* Mobile Drawer */}
-      <Drawer
+      <SwipeableDrawer
         anchor="left"
         open={mobileMenuOpen}
         onClose={() => setMobileMenuOpen(false)}
+        onOpen={() => setMobileMenuOpen(true)}
         PaperProps={{
           sx: {
             width: 280,
@@ -390,11 +454,16 @@ const Board = () => {
         }}
       >
         <Box sx={{ p: 2 }}>
-          <Box display="flex" alignItems="center" gap={1} mb={3}>
-            <ViewKanbanIcon sx={{ color: '#667eea', fontSize: '28px' }} />
-            <Typography variant="h6" fontWeight="700">
-              KanbanFlow
-            </Typography>
+          <Box display="flex" alignItems="center" justifyContent="space-between" mb={3}>
+            <Box display="flex" alignItems="center" gap={1}>
+              <ViewKanbanIcon sx={{ color: '#667eea', fontSize: '28px' }} />
+              <Typography variant="h6" fontWeight="700">
+                KanbanFlow
+              </Typography>
+            </Box>
+            <IconButton onClick={() => setMobileMenuOpen(false)}>
+              <CloseIcon />
+            </IconButton>
           </Box>
           
           <TextField
@@ -425,22 +494,61 @@ const Board = () => {
             }}
           />
           
-          <Box display="flex" flexDirection="column" gap={1}>
+          <Box display="flex" flexDirection="column" gap={2} mb={3}>
             <Box display="flex" alignItems="center" gap={1}>
-              <DashboardIcon sx={{ color: '#667eea', fontSize: '18px' }} />
-              <Typography variant="body2">
+              <DashboardIcon sx={{ color: '#667eea', fontSize: '20px' }} />
+              <Typography variant="body1" fontWeight="500">
                 {sections.length} boards
               </Typography>
             </Box>
             <Box display="flex" alignItems="center" gap={1}>
-              <PeopleIcon sx={{ color: '#667eea', fontSize: '18px' }} />
-              <Typography variant="body2">
+              <PeopleIcon sx={{ color: '#667eea', fontSize: '20px' }} />
+              <Typography variant="body1" fontWeight="500">
                 {userCount} members
               </Typography>
             </Box>
           </Box>
+          
+          {!token && (
+            <Button
+              variant="contained"
+              fullWidth
+              onClick={() => {
+                setIsAuthFormOpen(true);
+                setMobileMenuOpen(false);
+              }}
+              sx={{
+                background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
+                '&:hover': {
+                  background: 'linear-gradient(45deg, #5a6fd8 0%, #6a4190 100%)',
+                },
+                mb: 2,
+              }}
+            >
+              Sign Up / Login
+            </Button>
+          )}
+          
+          {token && (
+            <Box>
+              <Typography variant="body2" fontWeight="600" gutterBottom>
+                Welcome, {user?.name}
+              </Typography>
+              <Button
+                variant="outlined"
+                fullWidth
+                onClick={() => {
+                  handleLogout();
+                  setMobileMenuOpen(false);
+                }}
+                sx={{ color: '#ff4444', borderColor: '#ff4444' }}
+              >
+                Logout
+              </Button>
+            </Box>
+          )}
         </Box>
-      </Drawer>
+      </SwipeableDrawer>
 
       {/* Board Content */}
       <Box
@@ -449,8 +557,8 @@ const Board = () => {
           display: 'flex',
           overflowX: 'auto',
           overflowY: 'hidden',
-          padding: 2,
-          gap: 2,
+          padding: { xs: 1, sm: 2 },
+          gap: { xs: 1, sm: 2 },
           background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
           '&::-webkit-scrollbar': {
             height: '8px',
@@ -466,14 +574,15 @@ const Board = () => {
           '&::-webkit-scrollbar-thumb:hover': {
             background: 'linear-gradient(45deg, #5a6fd8 0%, #6a4190 100%)',
           },
+          position: 'relative',
         }}
       >
         {filteredSections.map((section) => (
           <Box
             key={section._id}
             sx={{
-              minWidth: isMobile ? '85vw' : 320,
-              maxWidth: isMobile ? '85vw' : 320,
+              minWidth: { xs: '85vw', sm: 320 },
+              maxWidth: { xs: '85vw', sm: 320 },
             }}
           >
             <Section
@@ -505,8 +614,8 @@ const Board = () => {
         {!searchQuery && (
           <Box
             sx={{
-              minWidth: isMobile ? '85vw' : 320,
-              maxWidth: isMobile ? '85vw' : 320,
+              minWidth: { xs: '85vw', sm: 320 },
+              maxWidth: { xs: '85vw', sm: 320 },
               display: 'flex',
               alignItems: 'flex-start',
               pt: '10px',
@@ -535,6 +644,26 @@ const Board = () => {
         )}
       </Box>
 
+      {/* Floating Action Button for Mobile */}
+      {isMobile && !searchQuery && (
+        <Fab
+          color="primary"
+          aria-label="add section"
+          onClick={() => setIsSectionFormOpen(true)}
+          sx={{
+            position: 'fixed',
+            bottom: 16,
+            right: 16,
+            background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
+            '&:hover': {
+              background: 'linear-gradient(45deg, #5a6fd8 0%, #6a4190 100%)',
+            },
+          }}
+        >
+          <AddIcon />
+        </Fab>
+      )}
+
       {/* Add Section Popup */}
       <Dialog
         open={isSectionFormOpen}
@@ -543,8 +672,13 @@ const Board = () => {
           sx: {
             borderRadius: 3,
             boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
+            mx: { xs: 2, sm: 0 },
+            width: { xs: '100%', sm: 'auto' },
+            maxWidth: { xs: 'none', sm: 500 },
           },
         }}
+        fullWidth
+        maxWidth="sm"
       >
         <DialogTitle sx={{ 
           background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',

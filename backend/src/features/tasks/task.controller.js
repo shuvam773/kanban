@@ -67,7 +67,7 @@ export default class TaskController {
                 taskId,
                 sourceSectionId,
                 destinationSectionId,
-                task,
+                task: task.toObject(),
                 boardId: 'default-board'
             });
             

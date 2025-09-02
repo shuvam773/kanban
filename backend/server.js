@@ -8,7 +8,6 @@ import taskRouter from './src/features/tasks/task.routes.js';
 import userRouter from './src/features/user/user.routes.js';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
-import TaskModel from './src/features/tasks/task.model.js';
 
 const app = express();
 const server = createServer(app);
@@ -80,27 +79,6 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id, 'User ID:', socket.userId);
-  });
-
-  socket.on('move-task', async (data) => {
-    const { taskId, sourceSectionId, destinationSectionId } = data;
-    try {
-      const task = await TaskModel.moveTask(taskId, sourceSectionId, destinationSectionId);
-
-      const payload = {
-          taskId,
-          sourceSectionId,
-          destinationSectionId,
-          task,
-          boardId: 'default-board'
-      };
-
-      io.to('default-board').emit('task-moved', payload);
-    } catch (err) {
-      console.error('Error moving task:', err);
-      // Optionally, emit an error event back to the client
-      socket.emit('task-move-failed', { taskId, message: 'Failed to move task.' });
-    }
   });
 });
 

@@ -77,9 +77,6 @@ io.on('connection', (socket) => {
     console.log(`User ${socket.userId} left board ${boardId}`);
   });
 
-  // Remove all these client event listeners - they're causing the loop
-  // The backend controllers will handle emitting events after database operations
-
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id, 'User ID:', socket.userId);
   });

@@ -7,6 +7,7 @@ const taskSchema = new mongoose.Schema({
     description: { type: String, required: true },
     dueDate: { type: Date, required: true },
     assignee: { type: String, required: true },  // Changed to string
+    priority:{type: String, required: true},
     section: { type: mongoose.Schema.Types.ObjectId, ref: 'Section', required: true }
 }, { timestamps: true });
 
@@ -14,7 +15,7 @@ const Task = mongoose.model('Task', taskSchema);
 
 export default class TaskModel {
 
-    static async addTask({ name, description, dueDate, assignee, section }) {
+    static async addTask({ name, description, dueDate, assignee, priority, section }) {
         try {
             const sectionDoc = await Section.findById(section);
 
@@ -22,7 +23,7 @@ export default class TaskModel {
                 throw new Error("Section does not exist");
             }
 
-            const newTask = new Task({ name, description, dueDate, assignee: assignee.trim(), section: sectionDoc._id });
+            const newTask = new Task({ name, description, dueDate, assignee: assignee.trim(), priority, section: sectionDoc._id });
 
             // Add the new task to the corresponding section
             sectionDoc.tasks.push(newTask._id);

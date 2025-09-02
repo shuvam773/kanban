@@ -9,7 +9,6 @@ import {
   Menu,
   MenuItem,
   Avatar,
-  Button,
   Tooltip,
   Chip,
   alpha,
@@ -17,7 +16,7 @@ import {
   Card,
   CardContent,
   Slide,
-  Fade
+  Badge
 } from "@mui/material";
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import EditIcon from '@mui/icons-material/Edit';
@@ -44,10 +43,10 @@ const formatDueDate = (dueDate) => {
   if (!dueDate) return { text: "No due date", color: "#9CA3AF", icon: <EventIcon sx={{ fontSize: 14 }} /> };
   
   const date = dayjs(dueDate);
-  if (date.isToday()) return { text: "Today", color: "#EF4444", icon: <EventIcon sx={{ fontSize: 14 }} /> }; // Red
-  if (date.isTomorrow()) return { text: "Tomorrow", color: "#F59E0B", icon: <EventIcon sx={{ fontSize: 14 }} /> }; // Amber
-  if (date.isYesterday()) return { text: "Overdue", color: "#DC2626", icon: <EventIcon sx={{ fontSize: 14 }} /> }; // Dark red
-  return { text: date.format("MMM D"), color: "#3B82F6", icon: <EventIcon sx={{ fontSize: 14 }} /> }; // Blue
+  if (date.isToday()) return { text: "Today", color: "#EF4444", icon: <EventIcon sx={{ fontSize: 14 }} /> };
+  if (date.isTomorrow()) return { text: "Tomorrow", color: "#F59E0B", icon: <EventIcon sx={{ fontSize: 14 }} /> };
+  if (date.isYesterday()) return { text: "Overdue", color: "#DC2626", icon: <EventIcon sx={{ fontSize: 14 }} /> };
+  return { text: date.format("MMM D"), color: "#3B82F6", icon: <EventIcon sx={{ fontSize: 14 }} /> };
 };
 
 const getPriorityColor = (priority) => {
@@ -56,6 +55,15 @@ const getPriorityColor = (priority) => {
     case 'medium': return '#F59E0B';
     case 'low': return '#10B981';
     default: return '#9CA3AF';
+  }
+};
+
+const getPriorityIcon = (priority) => {
+  switch (priority?.toLowerCase()) {
+    case 'high': return '🔥';
+    case 'medium': return '⚠️';
+    case 'low': return '💤';
+    default: return '';
   }
 };
 
@@ -69,6 +77,7 @@ const TaskCard = memo(({ task, sectionId }) => {
 
   const { text: dueText, color: dueColor, icon: dueIcon } = formatDueDate(task.dueDate);
   const priorityColor = getPriorityColor(task.priority);
+  const priorityIcon = getPriorityIcon(task.priority);
 
   // Drag handling
   const [{ isDragging }, drag] = useDrag({
@@ -123,25 +132,28 @@ const TaskCard = memo(({ task, sectionId }) => {
           background: theme.palette.background.paper,
           '&:hover': {
             boxShadow: theme.shadows[4],
-          }
+          },
+          position: 'relative',
+          overflow: 'visible'
         }}
       >
-        <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-          {/* Priority indicator */}
-          {task.priority && (
-            <Box 
-              sx={{ 
-                position: 'absolute', 
-                top: 8, 
-                left: 8, 
-                width: 4, 
-                height: 20, 
-                borderRadius: 1, 
-                backgroundColor: priorityColor 
-              }} 
-            />
-          )}
+        {/* Priority indicator bar on the left */}
+        {task.priority && (
+          <Box 
+            sx={{ 
+              position: 'absolute', 
+              top: 0, 
+              left: 0, 
+              width: 4, 
+              height: '100%', 
+              borderTopLeftRadius: 12,
+              borderBottomLeftRadius: 12,
+              backgroundColor: priorityColor 
+            }} 
+          />
+        )}
 
+        <CardContent sx={{ p: 2, pl: task.priority ? 3 : 2, '&:last-child': { pb: 2 } }}>
           {/* Task Title and Menu Button */}
           <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1.5}>
             <Typography 
@@ -220,9 +232,9 @@ const TaskCard = memo(({ task, sectionId }) => {
           )}
 
           {/* Metadata row */}
-          <Box display="flex" alignItems="center" justifyContent="space-between">
+          <Box display="flex" alignItems="center" justifyContent="space-between" gap={1}>
             {/* Left side: Due date and assignee */}
-            <Box display="flex" alignItems="center" gap={1}>
+            <Box display="flex" alignItems="center" gap={1} flex={1}>
               {/* Due Date */}
               <Chip
                 icon={dueIcon}
@@ -242,34 +254,42 @@ const TaskCard = memo(({ task, sectionId }) => {
               />
 
               {/* Assignee */}
-              <Tooltip title={task.assignee || "Unassigned"} arrow>
-                <Avatar
-                  src={task.assignee ? `https://avatar.iran.liara.run/username?username=${task.assignee}` : ""}
-                  sx={{ 
-                    width: 24, 
-                    height: 24, 
-                    fontSize: "0.7rem",
-                    backgroundColor: task.assignee ? alpha(theme.palette.primary.main, 0.2) : alpha(theme.palette.text.secondary, 0.2),
-                    color: task.assignee ? theme.palette.primary.main : theme.palette.text.secondary
-                  }}
-                >
-                  {task.assignee ? task.assignee.charAt(0).toUpperCase() : <PersonIcon sx={{ fontSize: 14 }} />}
-                </Avatar>
-              </Tooltip>
+              {task.assignee && (
+                <Tooltip title={task.assignee} arrow>
+                  <Avatar
+                    src={`https://avatar.iran.liara.run/username?username=${task.assignee}`}
+                    sx={{ 
+                      width: 24, 
+                      height: 24, 
+                      fontSize: "0.7rem",
+                      backgroundColor: alpha(theme.palette.primary.main, 0.2),
+                      color: theme.palette.primary.main
+                    }}
+                  >
+                    {task.assignee.charAt(0).toUpperCase()}
+                  </Avatar>
+                </Tooltip>
+              )}
             </Box>
 
-            {/* Right side: Priority badge (if exists) */}
+            {/* Right side: Priority badge (always show if priority exists) */}
             {task.priority && (
               <Chip
+                icon={<span>{priorityIcon}</span>}
                 label={task.priority}
                 size="small"
                 sx={{
-                  height: 20,
-                  fontSize: '0.65rem',
+                  height: 24,
+                  fontSize: '0.7rem',
                   fontWeight: 600,
-                  backgroundColor: alpha(priorityColor, 0.1),
+                  backgroundColor: alpha(priorityColor, 0.15),
                   color: priorityColor,
-                  textTransform: 'capitalize'
+                  textTransform: 'capitalize',
+                  border: `1px solid ${alpha(priorityColor, 0.3)}`,
+                  '& .MuiChip-icon': {
+                    fontSize: '0.85rem',
+                    ml: 0.5
+                  }
                 }}
               />
             )}
@@ -289,4 +309,3 @@ const TaskCard = memo(({ task, sectionId }) => {
 });
 
 export default TaskCard;
-

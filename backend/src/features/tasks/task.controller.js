@@ -14,10 +14,10 @@ export default class TaskController {
 
     // Add a new task
     async addTask(req, res) {
-        const { name, description, dueDate, assignee, section } = req.body;
+        const { name, description, dueDate, assignee, priority, section } = req.body;
 
         try {
-            const task = await TaskModel.addTask({ name, description, dueDate, assignee, section });
+            const task = await TaskModel.addTask({ name, description, dueDate, assignee, priority, section });
 
             if (!task) {
                 return res.status(400).json({ message: "Failed to add task" });

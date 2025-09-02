@@ -35,6 +35,10 @@ class UserService {
       throw new Error("Invalid photo URL. Must be a .jpg, .jpeg, or .png link.");
     }
 
+    // Create and save user
+    const newUser = new User({ name, email, password: hashedPassword, userPhoto: finalPhoto });
+    await newUser.save();
+
     const token = jwt.sign(
       { userId: newUser.id, email: newUser.email }, // Include userId here
       process.env.JWT_SECRET,
@@ -50,10 +54,6 @@ class UserService {
         email: newUser.email
       }
     };
-
-    // Create and save user
-    const newUser = new User({ name, email, password: hashedPassword, userPhoto: finalPhoto });
-    return await newUser.save();
   }
 
   static async login(email, password) {

@@ -1,7 +1,7 @@
 import React, { useState, memo } from "react";
 import { useDrop } from "react-dnd";
 import { useDispatch } from "react-redux";
-import { addTask, deleteSection, updateSection, moveTask, addSection, fetchSections } from "../store/kanbanSlice";
+import { addTask, deleteSection, updateSection, moveTask, addSection } from "../store/kanbanSlice";
 import {
   Box,
   IconButton,
@@ -68,9 +68,7 @@ const Section = memo(({ section }) => {
             destinationSectionId: section._id
           });
         }
-         setTimeout(() => {
-          dispatch(fetchSections());
-        }, 10);
+        
       }
     },
     collect: (monitor) => ({

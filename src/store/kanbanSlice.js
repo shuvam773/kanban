@@ -205,15 +205,6 @@ const kanbanSlice = createSlice({
       .addCase(deleteSection.fulfilled, (state, action) => {
         state.sections = state.sections.filter((s) => s._id !== action.payload);
       })
-      .addCase(addTask.fulfilled, (state, action) => {
-        const { sectionId, task } = action.payload;
-        const section = state.sections.find((s) => s._id === sectionId);
-
-        if (section) {
-          if (!section.tasks) section.tasks = [];
-          section.tasks.push({ ...task });
-        }
-      })
       .addCase(updateTask.fulfilled, (state, action) => {
         const { sectionId, taskId, updatedTask } = action.payload;
         const section = state.sections.find((s) => s._id === sectionId);

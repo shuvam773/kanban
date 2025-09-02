@@ -53,13 +53,6 @@ const Section = memo(({ section }) => {
     accept: "TASK",
     drop: (item) => {
       if (item.sourceSectionId !== section._id) {
-        dispatch(moveTask({
-          taskId: item.taskId,
-          sourceSectionId: item.sourceSectionId,
-          destinationSectionId: section._id,
-          task: item.task
-        }));
-        
         // Emit socket event for real-time update
         if (socket) {
           socket.emit('move-task', {

@@ -232,28 +232,6 @@ const kanbanSlice = createSlice({
           section.tasks = section.tasks.filter(
             (t) => t._id !== action.payload.taskId
           );
-      })
-      .addCase(moveTask.fulfilled, (state, action) => {
-        const { taskId, sourceSectionId, destinationSectionId, task } =
-          action.payload;
-
-        const sourceSection = state.sections.find(
-          (s) => s._id === sourceSectionId
-        );
-        const destSection = state.sections.find(
-          (s) => s._id === destinationSectionId
-        );
-
-        if (sourceSection && destSection) {
-          // Remove task from source section
-          sourceSection.tasks = sourceSection.tasks.filter(
-            (t) => t._id !== taskId
-          );
-
-          // Add task to destination section
-          if (!destSection.tasks) destSection.tasks = [];
-          destSection.tasks.push(task);
-        }
       });
   },
 });

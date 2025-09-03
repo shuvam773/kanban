@@ -1,6 +1,7 @@
 import express from 'express';
-import 'dotenv/config';
+import dotenv from 'dotenv';
 import { createServer } from 'http';
+dotenv.config();
 import { Server } from 'socket.io';
 import connectDB from './src/config/db.config.js';
 import bodyParser from 'body-parser';
@@ -87,7 +88,7 @@ io.on('connection', (socket) => {
 connectDB();
 
 // Start server
-const port = process.env.PORT || 5000;
+const port = process.env.PORT;
 app.get("/test", (req, res) => res.send("Express on Vercel"));
 
 server.listen(port, () => {

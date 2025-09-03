@@ -28,7 +28,6 @@ import {
   Chip,
   Fab,
   SwipeableDrawer,
-  alpha,
 } from '@mui/material';
 import Section from './Section';
 import AddIcon from '@mui/icons-material/Add';

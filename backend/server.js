@@ -88,7 +88,7 @@ connectDB();
 
 // Start server
 const port = process.env.PORT || 5000;
-app.get("/", (req, res) => res.send("Express on Vercel"));
+app.get("/test", (req, res) => res.send("Express on Vercel"));
 
 server.listen(port, () => {
   console.log(`Server is running on port ${port}`);

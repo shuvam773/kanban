@@ -1,4 +1,5 @@
 import express from 'express';
+import 'dotenv/config';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import connectDB from './src/config/db.config.js';
@@ -87,9 +88,7 @@ connectDB();
 
 // Start server
 const port = process.env.PORT || 5000;
-app.get('/', (req, res) => {
-  res.send('Welcome to Kanban Board API with Socket.io');
-});
+app.get("/", (req, res) => res.send("Express on Vercel"));
 
 server.listen(port, () => {
   console.log(`Server is running on port ${port}`);

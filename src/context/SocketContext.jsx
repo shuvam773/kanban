@@ -8,27 +8,43 @@ export const SocketProvider = ({ children }) => {
   const token = useSelector((state) => state.auth.token);
 
   useEffect(() => {
-    if (token) {
-      const newSocket = io("https://kanban-6gbw.onrender.com", {
-        auth: {
-          token: token
-        }
-      });
-      
-      setSocket(newSocket);
+    // Create socket connection with or without token
+    const newSocket = io("https://kanban-6gbw.onrender.com", {
+      auth: token ? { token } : undefined
+    });
+    
+    setSocket(newSocket);
 
-      return () => newSocket.close();
-    } else {
-      // If no token, close existing socket
-      if (socket) {
-        socket.close();
-        setSocket(null);
+    // Cleanup on unmount or token change
+    return () => {
+      if (newSocket) {
+        newSocket.close();
       }
-    }
+    };
   }, [token]);
 
+  const [isConnected, setIsConnected] = useState(false);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleConnect = () => setIsConnected(true);
+    const handleDisconnect = () => setIsConnected(false);
+
+    socket.on('connect', handleConnect);
+    socket.on('disconnect', handleDisconnect);
+
+    // Set initial connection state
+    setIsConnected(socket.connected);
+
+    return () => {
+      socket.off('connect', handleConnect);
+      socket.off('disconnect', handleDisconnect);
+    };
+  }, [socket]);
+
   return (
-    <SocketContext.Provider value={socket}>
+    <SocketContext.Provider value={{ socket, isConnected }}>
       {children}
     </SocketContext.Provider>
   );

@@ -48,18 +48,19 @@ app.use('/api/auth', userRouter);
 io.use((socket, next) => {
   const token = socket.handshake.auth.token;
   
-  if (!token) {
-    return next(new Error('Authentication error: No token provided'));
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      socket.userId = decoded.userId;
+      socket.userEmail = decoded.email;
+    } catch (err) {
+      console.log('Invalid token, continuing as anonymous user');
+    }
   }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    socket.userId = decoded.userId;
-    socket.userEmail = decoded.email;
-    next();
-  } catch (err) {
-    next(new Error('Authentication error: Invalid token'));
-  }
+  
+  // Allow connection even without token
+  socket.userId = socket.userId || 'anonymous_' + socket.id;
+  next();
 });
 
 // Socket.io connection handling

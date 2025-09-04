@@ -72,10 +72,10 @@ const Board = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuAnchorEl, setUserMenuAnchorEl] = useState(null);
   const [showSearch, setShowSearch] = useState(false);
-  const socket = useSocket();
+  const { socket, isConnected } = useSocket();
 
   useEffect(() => {
-    if (!socket) return;
+    if (!socket || !isConnected) return;
 
     // Join the default board room when connected
     socket.emit('join-board', 'default-board');
@@ -122,7 +122,7 @@ const Board = () => {
       socket.off('task-moved');
       socket.off('task-deleted');
     };
-  }, [socket, dispatch]);
+  }, [socket, isConnected, dispatch]);
 
   useEffect(() => {
     dispatch(fetchSections());

@@ -58,6 +58,18 @@ MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
 ```
 
+### Connecting to the Backend
+
+For the frontend to connect to the backend, you need to update the backend URL in the `src/context/SocketContext.jsx` file. Replace the existing URL with your backend server address.
+
+```javascript
+// src/context/SocketContext.jsx
+
+const newSocket = io("your_backend_url", {
+  auth: token ? { token } : undefined
+});
+```
+
 ## Available Scripts
 
 ### Frontend
